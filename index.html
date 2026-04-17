@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wren Playground — Run Wren Code in Your Browser</title>
+
+<!-- ── Primary SEO ──────────────────────────────────────────── -->
+<meta name="description"
+  content="The only online Wren compiler and playground. Write, run, and share Wren code instantly in your browser — no installation required. Supports classes, closures, fibers, operator overloading, and the full Wren standard library.">
+<meta name="keywords"
+  content="Wren, Wren language, Wren compiler, Wren playground, online Wren, Wren REPL, Wren interpreter, wren.io, DOME engine, run Wren online, Wren examples, Wren tutorial, browser IDE">
+<meta name="author" content="Shourya Nundy">
+<link rel="canonical" href="https://wren-compiler.netlify.app/">
+<meta name="robots" content="index, follow">
+
+<!-- ── Open Graph (link previews on Twitter, LinkedIn, Discord) -->
+<meta property="og:type"         content="website">
+<meta property="og:url"          content="https://wren-compiler.netlify.app/">
+<meta property="og:title"        content="Wren Playground — Run Wren Code in Your Browser">
+<meta property="og:description"  content="The only online execution environment for the Wren programming language. No install. No server. Write, run, and share Wren snippets instantly.">
+<!-- <meta property="og:image"        content="https://wren.tools/og-image.png">
+<meta property="og:image:width"  content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt"    content="Wren Playground — code editor with Wren syntax highlighting and live output panel"> -->
+<meta property="og:site_name"    content="Wren Playground">
+<meta property="og:locale"       content="en_US">
+
+<!-- ── Twitter Card ─────────────────────────────────────────── -->
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="Wren Playground — Run Wren in Your Browser">
+<meta name="twitter:description" content="Write and run Wren code online. Supports classes, closures, fibers, operator overloading, and more. No install needed.">
+<!-- <meta name="twitter:image"       content="https://wren.tools/og-image.png"> -->
+
+<!-- ── Schema.org structured data ───────────────────────────── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Wren Playground",
+  "url": "https://wren-compiler.netlify.app",
+  "description": "Browser-based execution environment for the Wren programming language. Write, run, and share Wren code online with zero setup. Supports the full Wren language specification including classes, closures, fibers, operator overloading, and string interpolation.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript",
+  "featureList": [
+    "Full Wren language support",
+    "Monaco code editor with syntax highlighting",
+    "Shareable snippet links",
+    "Zero server-side execution",
+    "Built-in example programs",
+    "Fiber coroutine support"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Shourya Nundy"
+  },
+  "keywords": "Wren, programming language, online compiler, REPL, browser IDE, DOME engine"
+}
+</script>
+
+<link rel="stylesheet" data-name="vs/editor/editor.main"
+      href="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.css">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3352;
+    --accent: #7c6af7;
+    --accent2: #5eead4;
+    --text: #e2e4f0;
+    --text2: #8b90b0;
+    --error: #f87171;
+    --success: #4ade80;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,sans-serif;
+         height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+  header { display:flex; align-items:center; gap:12px; padding:10px 18px;
+           background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; user-select:none; }
+  .logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+  .logo-icon { width:32px; height:32px; background:linear-gradient(135deg,var(--accent),var(--accent2));
+               border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
+  .logo-text { font-size:18px; font-weight:700; color:var(--text); letter-spacing:-0.3px; }
+  .logo-badge { font-size:10px; background:var(--accent); color:#fff; padding:2px 7px;
+                border-radius:999px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; }
+  .spacer { flex:1; }
+  .examples-wrap { display:flex; align-items:center; gap:6px; }
+  .examples-label { font-size:12px; color:var(--text2); white-space:nowrap; }
+  select.examples-select { background:var(--surface2); color:var(--text); border:1px solid var(--border);
+    border-radius:6px; padding:5px 10px; font-size:13px; cursor:pointer; outline:none; max-width:200px; }
+  select.examples-select:hover { border-color:var(--accent); }
+  .btn-share { background:var(--surface2); color:var(--text2); border:1px solid var(--border);
+    border-radius:6px; padding:6px 14px; font-size:13px; cursor:pointer; display:flex;
+    align-items:center; gap:6px; transition:all 0.15s; }
+  .btn-share:hover { color:var(--text); border-color:var(--accent2); }
+  .btn-run { background:var(--accent); color:#fff; border:none; border-radius:7px; padding:8px 20px;
+    font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:7px;
+    transition:all 0.15s; }
+  .btn-run:hover { background:#6b5ce7; transform:translateY(-1px); }
+  .btn-run:active { transform:none; }
+  .btn-run.running { opacity:0.7; pointer-events:none; }
+  .main { display:flex; flex:1; overflow:hidden; }
+  .editor-pane { flex:1.1; display:flex; flex-direction:column; border-right:1px solid var(--border); min-width:0; }
+  .pane-header { display:flex; align-items:center; gap:8px; padding:6px 14px; background:var(--surface);
+    border-bottom:1px solid var(--border); font-size:12px; color:var(--text2); flex-shrink:0; }
+  .pane-header .dot { width:7px; height:7px; border-radius:50%; background:var(--accent); }
+  .pane-header .filename { color:var(--text); font-weight:500; }
+  .btn-clear-editor { margin-left:auto; background:none; border:none; color:var(--text2); cursor:pointer;
+    font-size:11px; padding:2px 6px; border-radius:4px; transition:color 0.1s; }
+  .btn-clear-editor:hover { color:var(--text); }
+  #editor { flex:1; }
+  .output-pane { flex:0.9; display:flex; flex-direction:column; min-width:300px; max-width:500px; }
+  .output-header { display:flex; align-items:center; gap:8px; padding:6px 14px; background:var(--surface);
+    border-bottom:1px solid var(--border); font-size:12px; color:var(--text2); flex-shrink:0; }
+  .output-status { display:flex; align-items:center; gap:5px; margin-left:auto; font-size:11px; }
+  .status-dot { width:6px; height:6px; border-radius:50%; background:var(--text2); }
+  .status-dot.ok { background:var(--success); }
+  .status-dot.error { background:var(--error); }
+  .btn-clear { background:none; border:none; color:var(--text2); cursor:pointer; font-size:11px;
+    padding:2px 6px; border-radius:4px; transition:color 0.1s; margin-left:8px; }
+  .btn-clear:hover { color:var(--text); }
+  #output { flex:1; overflow-y:auto; padding:16px; font-family:var(--font-mono); font-size:13.5px;
+    line-height:1.65; background:var(--bg); white-space:pre-wrap; word-break:break-word; }
+  #output .line { display:block; }
+  #output .line.error-line { color:var(--error); }
+  #output .line.stdout { color:var(--text); }
+  .output-placeholder { color:var(--text2); font-style:italic; font-size:13px; font-family:system-ui,sans-serif; }
+  .statusbar { display:flex; align-items:center; gap:14px; padding:4px 16px; background:var(--surface);
+    border-top:1px solid var(--border); font-size:11.5px; color:var(--text2); flex-shrink:0; }
+  .statusbar a { color:var(--accent2); text-decoration:none; }
+  .statusbar a:hover { text-decoration:underline; }
+  .toast { position:fixed; bottom:40px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--surface2); color:var(--text); border:1px solid var(--border); border-radius:8px;
+    padding:10px 20px; font-size:13px; opacity:0; transition:all 0.2s ease; pointer-events:none;
+    z-index:9999; white-space:nowrap; }
+  .toast.visible { opacity:1; transform:translateX(-50%) translateY(0); }
+  ::-webkit-scrollbar { width:6px; height:6px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+  ::-webkit-scrollbar-thumb:hover { background:var(--text2); }
+  @media (max-width:720px) {
+    .main { flex-direction:column; }
+    .editor-pane { border-right:none; border-bottom:1px solid var(--border); }
+    .output-pane { max-width:100%; min-height:200px; }
+    .examples-label,.logo-badge { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="#">
+    <div class="logo-icon">🐦</div>
+    <span class="logo-text">Wren Playground</span>
+    <span class="logo-badge">In-Browser</span>
+  </a>
+  <div class="spacer"></div>
+  <div class="examples-wrap">
+    <span class="examples-label">Examples:</span>
+    <select class="examples-select" id="examplesSelect">
+      <option value="">Choose an example…</option>
+      <option value="hello">Hello, World!</option>
+      <option value="classes">Classes &amp; Inheritance</option>
+      <option value="closures">Closures &amp; Higher-Order</option>
+      <option value="lists">Lists &amp; Functional</option>
+      <option value="maps">Maps</option>
+      <option value="ranges">Ranges &amp; FizzBuzz</option>
+      <option value="strings">String Methods</option>
+      <option value="recursion">Recursion (Fibonacci)</option>
+      <option value="operators">Operator Overloading</option>
+    </select>
+  </div>
+  <button class="btn-share" id="btnShare">
+    <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
+      <path d="M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5z"/>
+    </svg>
+    Share
+  </button>
+  <button class="btn-run" id="btnRun">
+    <svg viewBox="0 0 16 16" fill="currentColor" width="13" height="13"><path d="M3 2.5l10 5.5-10 5.5V2.5z"/></svg>
+    Run
+  </button>
+</header>
+
+<div class="main">
+  <div class="editor-pane">
+    <div class="pane-header">
+      <div class="dot"></div>
+      <span class="filename">main.wren</span>
+      <button class="btn-clear-editor" id="btnClearEditor">Clear</button>
+    </div>
+    <div id="editor"></div>
+  </div>
+  <div class="output-pane">
+    <div class="output-header">
+      <div class="dot" style="background:var(--accent2)"></div>
+      <span>Output</span>
+      <div class="output-status">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">ready</span>
+        <button class="btn-clear" id="btnClear">Clear</button>
+      </div>
+    </div>
+    <div id="output">
+      <span class="output-placeholder">Press Run (or Ctrl+Enter) to execute your Wren code.</span>
+    </div>
+  </div>
+</div>
+
+<div class="statusbar">
+  <span>🐦 Wren language</span>
+  <span>·</span>
+  <span>Pure JS interpreter — no server, runs 100% in your browser</span>
+  <span>·</span>
+  <span><a href="https://wren.io" target="_blank" rel="noopener">wren.io docs ↗</a></span>
+  <span style="margin-left:auto" id="execTime"></span>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="wren.min.js"></script>
+
+<!-- Monaco Editor from CDN (syntax highlighting + editor) -->
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+
+<script>
+// ============================================================
+//  App — examples, Monaco setup, run logic
+// ============================================================
+const EXAMPLES = {
+  hello: `// Hello, World! in Wren
+System.print("Hello, Wren!")
+
+var greeting = "Welcome"
+var name = "World"
+System.print("%(greeting), %(name)!")
+
+// Math
+System.print("π ≈ " + Num.pi.toString)
+System.print("sqrt(2) = " + (2).sqrt.toString)
+`,
+
+  classes: `// Classes & Inheritance
+class Shape {
+  construct new(color) {
+    _color = color
+  }
+  color { _color }
+  area { 0 }
+  describe() {
+    System.print("A " + color + " " + type + " with area " + area.toString)
+  }
+}
+
+class Circle is Shape {
+  construct new(color, radius) {
+    super.new(color)
+    _radius = radius
+  }
+  radius { _radius }
+  area { Num.pi * _radius * _radius }
+  type { "circle" }
+}
+
+class Rect is Shape {
+  construct new(color, w, h) {
+    super.new(color)
+    _w = w
+    _h = h
+  }
+  area { _w * _h }
+  type { "rectangle" }
+}
+
+var c = Circle.new("red", 5)
+var r = Rect.new("blue", 4, 6)
+c.describe()
+r.describe()
+System.print(c is Circle)
+System.print(c is Shape)
+`,
+
+  closures: `// Closures & Higher-Order Functions
+
+// Currying — returns a function from a function
+var multiply = Fn.new { |a| Fn.new { |b| a * b } }
+var double = multiply.call(2)
+var triple = multiply.call(3)
+System.print(double.call(7))
+System.print(triple.call(7))
+
+// Compose two functions
+var compose = Fn.new { |f, g| Fn.new { |x| f.call(g.call(x)) } }
+var addOne = Fn.new { |n| n + 1 }
+var square  = Fn.new { |n| n * n }
+var squareThenAdd = compose.call(addOne, square)
+System.print(squareThenAdd.call(4))  // (4^2)+1 = 17
+System.print(squareThenAdd.call(5))  // (5^2)+1 = 26
+`,
+
+  lists: `// Lists & Functional Programming
+var nums = (1..20).toList
+
+// Chain map / filter / reduce
+var result = nums
+  .where { |n| n % 2 == 0 }
+  .map   { |n| n * n }
+  .where { |n| n > 50 }
+
+System.print("Even squares > 50:")
+for (n in result) {
+  System.print("  " + n.toString)
+}
+
+// Sorting with custom comparator
+var words = ["banana", "apple", "cherry", "date", "elderberry"]
+words.sort { |a, b| a.count - b.count }
+System.print(words.join(", "))
+
+// Sum via reduce
+var sum = nums.reduce(0) { |acc, n| acc + n }
+System.print("Sum 1–20: " + sum.toString)
+`,
+
+  maps: `// Maps (hash tables)
+var scores = {}
+scores["Alice"]   = 95
+scores["Bob"]     = 87
+scores["Charlie"] = 92
+
+for (name in scores.keys) {
+  System.print(name + ": " + scores[name].toString)
+}
+System.print("Count: " + scores.count.toString)
+
+// Word frequency counter
+var text = "the quick brown fox jumps over the lazy dog the fox"
+var words = text.split(" ")
+var freq = {}
+for (word in words) {
+  if (freq.containsKey(word)) {
+    freq[word] = freq[word] + 1
+  } else {
+    freq[word] = 1
+  }
+}
+System.print("\"the\" → " + freq["the"].toString + " times")
+System.print("\"fox\" → " + freq["fox"].toString + " times")
+`,
+
+  ranges: `// Ranges & For Loops — FizzBuzz
+for (i in 1..30) {
+  if (i % 15 == 0) {
+    System.print("FizzBuzz")
+  } else if (i % 3 == 0) {
+    System.print("Fizz")
+  } else if (i % 5 == 0) {
+    System.print("Buzz")
+  } else {
+    System.print(i)
+  }
+}
+`,
+
+  strings: `// String methods
+var s = "Hello, Wren!"
+System.print(s.count)
+System.print(s.uppercase)
+System.print(s.lowercase)
+System.print(s.contains("Wren"))
+System.print(s.startsWith("Hello"))
+System.print(s.endsWith("!"))
+System.print(s.indexOf("Wren"))
+System.print(s.replace("Wren", "World"))
+System.print(s.split(", ").count)
+
+var padded = "  hello world  "
+System.print("|" + padded.trim + "|")
+`,
+
+  recursion: `// Recursion: Fibonacci, Factorial, Primes
+class Math {
+  static fib(n) {
+    if (n <= 1) return n
+    return Math.fib(n - 1) + Math.fib(n - 2)
+  }
+
+  static factorial(n) {
+    if (n <= 1) return 1
+    return n * Math.factorial(n - 1)
+  }
+
+  static isPrime(n) {
+    if (n < 2) return false
+    var i = 2
+    while (i * i <= n) {
+      if (n % i == 0) return false
+      i = i + 1
+    }
+    return true
+  }
+}
+
+System.print("Fibonacci 0–10:")
+for (i in 0..10) {
+  System.print("  fib(" + i.toString + ") = " + Math.fib(i).toString)
+}
+
+System.print("Primes up to 50:")
+var primes = (2..50).toList.where { |n| Math.isPrime(n) }
+System.print(primes.join(", "))
+`,
+
+  operators: `// Operator Overloading — 3D Vectors
+class Vec3 {
+  construct new(x, y, z) {
+    _x = x
+    _y = y
+    _z = z
+  }
+  x { _x }
+  y { _y }
+  z { _z }
+
+  +(other) { Vec3.new(_x + other.x, _y + other.y, _z + other.z) }
+  -(other) { Vec3.new(_x - other.x, _y - other.y, _z - other.z) }
+  *(s)     { Vec3.new(_x * s, _y * s, _z * s) }
+  ==(other) { _x == other.x && _y == other.y && _z == other.z }
+
+  dot(other)  { _x * other.x + _y * other.y + _z * other.z }
+  magnitude   { (_x*_x + _y*_y + _z*_z).sqrt }
+  toString    { "Vec3(" + _x.toString + ", " + _y.toString + ", " + _z.toString + ")" }
+}
+
+var a = Vec3.new(1, 2, 3)
+var b = Vec3.new(4, 5, 6)
+System.print("a     = " + a.toString)
+System.print("b     = " + b.toString)
+System.print("a+b   = " + (a + b).toString)
+System.print("a*2   = " + (a * 2).toString)
+System.print("a·b   = " + a.dot(b).toString)
+System.print("|a|   = " + a.magnitude.toString)
+System.print("a==a: " + (a == a).toString)
+System.print("a==b: " + (a == b).toString)
+`
+};
+
+require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } });
+
+require(['vs/editor/editor.main'], function() {
+
+  monaco.languages.register({ id: 'wren' });
+
+  monaco.languages.setMonarchTokensProvider('wren', {
+    keywords: ['and','as','break','class','construct','continue','else',
+               'false','for','if','in','is','null','or','return',
+               'static','super','this','true','var','while'],
+    builtins: ['System','Num','String','Bool','Null','List','Map','Range','Fn','Object'],
+    tokenizer: {
+      root: [
+        [/"/, { token: 'string.quote', bracket: '@open', next: '@string' }],
+        [/\/\/.*$/, 'comment'],
+        [/\/\*/, 'comment', '@blockComment'],
+        [/0x[0-9a-fA-F]+/, 'number.hex'],
+        [/\d+(\.\d+)?([eE][+-]?\d+)?/, 'number'],
+        [/[a-zA-Z_][a-zA-Z0-9_]*/, { cases: { '@keywords':'keyword', '@builtins':'type.identifier', '@default':'identifier' } }],
+        [/\.\.\.?/, 'operator'],
+        [/[=!<>]=?/, 'operator'],
+        [/[+\-*\/%&|^~]/, 'operator'],
+        [/[(){}\[\],.]/, 'delimiter'],
+        [/[ \t\r\n]+/, 'white'],
+      ],
+      string: [
+        [/%\(/, { token: 'string.escape', bracket: '@open', next: '@interpolation' }],
+        [/\\[ntr"\\0abfv]/, 'string.escape'],
+        [/[^"%\\]+/, 'string'],
+        [/"/, { token: 'string.quote', bracket: '@close', next: '@pop' }],
+      ],
+      interpolation: [
+        [/\)/, { token: 'string.escape', bracket: '@close', next: '@pop' }],
+        { include: 'root' }
+      ],
+      blockComment: [
+        [/\*\//, 'comment', '@pop'],
+        [/[^*]+/, 'comment'],
+        [/\*/, 'comment'],
+      ],
+    }
+  });
+
+  monaco.editor.defineTheme('wren-dark', {
+    base: 'vs-dark', inherit: true,
+    rules: [
+      { token:'keyword',        foreground:'c792ea', fontStyle:'bold' },
+      { token:'type.identifier',foreground:'82aaff' },
+      { token:'string',         foreground:'c3e88d' },
+      { token:'string.quote',   foreground:'c3e88d' },
+      { token:'string.escape',  foreground:'f78c6c' },
+      { token:'comment',        foreground:'546e7a', fontStyle:'italic' },
+      { token:'number',         foreground:'f78c6c' },
+      { token:'operator',       foreground:'89ddff' },
+      { token:'delimiter',      foreground:'8b90b0' },
+    ],
+    colors: {
+      'editor.background':'#0f1117',
+      'editor.foreground':'#e2e4f0',
+      'editor.lineHighlightBackground':'#1a1d27',
+      'editor.selectionBackground':'#2e3352',
+      'editorLineNumber.foreground':'#3d4266',
+      'editorLineNumber.activeForeground':'#7c6af7',
+      'editorCursor.foreground':'#7c6af7',
+    }
+  });
+
+  let initialCode = EXAMPLES.hello;
+  try {
+    const hash = window.location.hash.slice(1);
+    if (hash) initialCode = decodeURIComponent(atob(hash));
+  } catch(e) {}
+
+  const editor = monaco.editor.create(document.getElementById('editor'), {
+    value: initialCode,
+    language: 'wren',
+    theme: 'wren-dark',
+    fontSize: 14,
+    fontFamily: "'JetBrains Mono','Fira Code','Cascadia Code',monospace",
+    fontLigatures: true,
+    lineNumbers: 'on',
+    minimap: { enabled: false },
+    scrollBeyondLastLine: false,
+    padding: { top: 14, bottom: 14 },
+    tabSize: 2,
+    insertSpaces: true,
+    wordWrap: 'on',
+    smoothScrolling: true,
+    cursorBlinking: 'smooth',
+    automaticLayout: true,
+  });
+
+  editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, runCode);
+
+  function runCode() {
+    const source = editor.getValue();
+    const btn = document.getElementById('btnRun');
+    const output = document.getElementById('output');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const execTime = document.getElementById('execTime');
+    btn.classList.add('running');
+    btn.innerHTML = '<svg viewBox="0 0 16 16" fill="currentColor" width="13" height="13"><rect x="3" y="3" width="4" height="10"/><rect x="9" y="3" width="4" height="10"/></svg> Running…';
+    setTimeout(() => {
+      const t0 = performance.now();
+      let result;
+      try { result = new WrenRuntime().run(source); }
+      catch(e) { result = { ok:false, output:'', error:e.message }; }
+      const elapsed = (performance.now() - t0).toFixed(1);
+      output.innerHTML = '';
+      if (result.output) {
+        const lines = result.output.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+          if (i === lines.length-1 && lines[i] === '') continue;
+          const s = document.createElement('span');
+          s.className = 'line stdout';
+          s.textContent = lines[i];
+          output.appendChild(s);
+          output.appendChild(document.createTextNode('\n'));
+        }
+      }
+      if (!result.ok && result.error) {
+        const e = document.createElement('span');
+        e.className = 'line error-line';
+        e.textContent = '✖ ' + result.error;
+        output.appendChild(e);
+      }
+      if (!result.output && !result.error) {
+        const p = document.createElement('span');
+        p.className = 'output-placeholder';
+        p.textContent = '(no output)';
+        output.appendChild(p);
+      }
+      statusDot.className = 'status-dot ' + (result.ok ? 'ok' : 'error');
+      statusText.textContent = result.ok ? 'ok' : 'error';
+      execTime.textContent = elapsed + 'ms';
+      btn.classList.remove('running');
+      btn.innerHTML = '<svg viewBox="0 0 16 16" fill="currentColor" width="13" height="13"><path d="M3 2.5l10 5.5-10 5.5V2.5z"/></svg> Run';
+    }, 10);
+  }
+
+  document.getElementById('btnRun').addEventListener('click', runCode);
+
+  document.getElementById('examplesSelect').addEventListener('change', function() {
+    const k = this.value;
+    if (k && EXAMPLES[k]) { editor.setValue(EXAMPLES[k]); editor.setScrollPosition({scrollTop:0}); }
+    this.value = '';
+  });
+
+  document.getElementById('btnClearEditor').addEventListener('click', () => { editor.setValue(''); editor.focus(); });
+
+  document.getElementById('btnClear').addEventListener('click', () => {
+    document.getElementById('output').innerHTML = '<span class="output-placeholder">Output cleared.</span>';
+    document.getElementById('statusDot').className = 'status-dot';
+    document.getElementById('statusText').textContent = 'ready';
+    document.getElementById('execTime').textContent = '';
+  });
+
+  document.getElementById('btnShare').addEventListener('click', () => {
+    const code = editor.getValue();
+    const encoded = btoa(encodeURIComponent(code));
+    const url = window.location.origin + window.location.pathname + '#' + encoded;
+    navigator.clipboard.writeText(url)
+      .then(() => showToast('Link copied to clipboard!'))
+      .catch(() => { window.location.hash = encoded; showToast('URL updated — copy from address bar'); });
+  });
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('visible');
+    setTimeout(() => t.classList.remove('visible'), 2200);
+  }
+
+  if (window.location.hash.slice(1)) setTimeout(runCode, 300);
+});
+</script>
+</body>
+</html>
