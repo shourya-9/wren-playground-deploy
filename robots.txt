@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
 Sitemap: https://wren-compiler.netlify.app/sitemap.xml
+Host: wren-compiler.netlify.app
