@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://wren.tools/sitemap.xml
+Sitemap: https://wren-compiler.netlify.app/sitemap.xml
