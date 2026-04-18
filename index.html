@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="google-site-verification" content="XSaEV_oYdeIrqAGirIexnh_f-msoKqbWrElg_gsMOIc" />
-<title>Wren Playground — Run Wren Code in Your Browser</title>
+<link rel="icon" type="image/png" href="wren-playground.png">
+<title>Online Wren Compiler — Wren Playground in Your Browser</title>
 
 <!-- ── Primary SEO ──────────────────────────────────────────── -->
 <meta name="description"
-  content="The only online Wren compiler and playground. Write, run, and share Wren code instantly in your browser — no installation required. Supports classes, closures, fibers, operator overloading, and the full Wren standard library.">
+  content="Free online Wren compiler and playground. Write, run, and share Wren code instantly in your browser with no installation required. Supports classes, closures, fibers, and the Wren standard library.">
 <meta name="keywords"
   content="Wren, Wren language, Wren compiler, Wren playground, online Wren, Wren REPL, Wren interpreter, wren.io, DOME engine, run Wren online, Wren examples, Wren tutorial, browser IDE">
 <meta name="author" content="Shourya Nundy">
@@ -65,6 +66,19 @@
 }
 </script>
 
+<script id="about-close-handler">
+  document.addEventListener("click", function (event) {
+    const details = document.querySelector(".about-inline");
+
+    if (!details) return;
+
+    // If click happened outside the details element, close it
+    if (!details.contains(event.target)) {
+      details.removeAttribute("open");
+    }
+  });
+</script>
+
 <link rel="stylesheet" data-name="vs/editor/editor.main"
       href="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.css">
 <style>
@@ -87,8 +101,14 @@
   header { display:flex; align-items:center; gap:12px; padding:10px 18px;
            background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; user-select:none; }
   .logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
-  .logo-icon { width:32px; height:32px; background:linear-gradient(135deg,var(--accent),var(--accent2));
-               border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    object-fit: contain;
+    display: block;
+  }
   .logo-text { font-size:18px; font-weight:700; color:var(--text); letter-spacing:-0.3px; }
   .logo-badge { font-size:10px; background:var(--accent); color:#fff; padding:2px 7px;
                 border-radius:999px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; }
@@ -122,6 +142,38 @@
   .output-header { display:flex; align-items:center; gap:8px; padding:6px 14px; background:var(--surface);
     border-bottom:1px solid var(--border); font-size:12px; color:var(--text2); flex-shrink:0; }
   .output-status { display:flex; align-items:center; gap:5px; margin-left:auto; font-size:11px; }
+  
+  .about-inline {
+    margin-left: 6px;
+    position: relative;
+  }
+
+  .about-inline summary {
+    cursor: pointer;
+    color: var(--accent2);
+    font-size: 11px;
+    list-style: none;
+  }
+
+  .about-inline summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .about-content {
+    position: absolute;
+    bottom: 26px;
+    left: 0;
+    width: 420px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text2);
+    box-shadow: 0 6px 18px rgba(0,0,0,.35);
+    z-index: 10;
+  }
   .status-dot { width:6px; height:6px; border-radius:50%; background:var(--text2); }
   .status-dot.ok { background:var(--success); }
   .status-dot.error { background:var(--error); }
@@ -159,7 +211,7 @@
 
 <header>
   <a class="logo" href="#">
-    <div class="logo-icon">🐦</div>
+    <img src="wren-playground.png" class="logo-icon">
     <span class="logo-text">Wren Playground</span>
     <span class="logo-badge">In-Browser</span>
   </a>
@@ -216,12 +268,40 @@
   </div>
 </div>
 
+
 <div class="statusbar">
-  <span>🐦 Wren language</span>
+  <span style="display:flex; align-items:center; gap:6px;">
+    <img src="wren-playground.png" alt="Wren logo"
+         style="width:14px; height:14px; object-fit:contain;">
+    Wren language
+  </span>
+
   <span>·</span>
-  <span>Pure JS interpreter — no server, runs 100% in your browser</span>
+
+  <span>
+    Browser-based Wren compiler — runs 100% client-side with no installation required
+  </span>
+
   <span>·</span>
-  <span><a href="https://wren.io" target="_blank" rel="noopener">wren.io docs ↗</a></span>
+
+  <span>
+    <a href="https://wren.io" target="_blank" rel="noopener">
+      wren.io docs ↗
+    </a>
+  </span>
+
+  <span>·</span>
+
+  <details class="about-inline">
+    <summary>What is Wren Playground?</summary>
+    <div class="about-content">
+      Wren Playground is a free online Wren compiler that runs entirely in your browser.
+      Write, test, and share Wren scripts instantly without installing the Wren runtime.
+      The execution environment is fully client-side, making it fast, portable,
+      and safe for experimentation.
+    </div>
+  </details>
+
   <span style="margin-left:auto" id="execTime"></span>
 </div>
 
