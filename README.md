@@ -1,4 +1,4 @@
-# Wren Playground — Browser-Based Wren Execution Environment
+# Wren Online Compiler — Browser-Based Wren Execution Environment
 
 > **Run Wren code instantly in your browser. No installation, no server, no runtime dependencies.**
 
@@ -10,9 +10,9 @@
 
 ## What Is This?
 
-**Wren Playground** is a fully client-side execution environment for the [Wren programming language](https://wren.io) — a small, fast, class-based scripting language designed for embedding in game engines and applications (most notably used in the [DOME engine](https://domeengine.com)).
+**Wren Online Compiler** is a fully client-side execution environment for the [Wren programming language](https://wren.io) — a small, fast, class-based scripting language designed for embedding in game engines and applications (most notably used in the [DOME engine](https://domeengine.com)).
 
-Unlike server-rendered REPLs or containerised sandbox runners, Wren Playground executes code **entirely inside the browser**. There is no backend, no code transmission, and no network latency between writing and running. The full execution pipeline runs in a single browser tab.
+Unlike server-rendered REPLs or containerised sandbox runners, this compiler executes code **entirely inside the browser**. There is no backend, no code transmission, and no network latency between writing and running. The full execution pipeline runs in a single browser tab.
 
 ---
 
@@ -24,7 +24,7 @@ Wren is a well-designed language with a clean syntax, first-class closures, sing
 - The only way to try Wren today is to build the C VM from source or use a language binding
 - This creates a significant friction barrier for developers evaluating the language or writing quick demos
 
-Wren Playground eliminates that friction entirely. **Write → Run → Share** in seconds, with no setup.
+Wren Online Compiler eliminates that friction entirely. **Write → Run → Share** in seconds, with no setup.
 
 ---
 
@@ -211,4 +211,4 @@ Official docs: [wren.io](https://wren.io) · Source: [github.com/wren-lang/wren]
 
 ## License
 
-MIT © 2025 Shourya Nundy
+MIT © 2026 Shourya Nundy
