@@ -1,4 +1,33 @@
 User-agent: *
 Allow: /
+
 Sitemap: https://wren-compiler.netlify.app/sitemap.xml
 Host: wren-compiler.netlify.app
+
+# OpenAI / ChatGPT
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+# Anthropic / Claude
+User-agent: ClaudeBot
+Allow: /
+
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+
+# Common AI & search crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+User-agent: Bravebot
+Allow: /
